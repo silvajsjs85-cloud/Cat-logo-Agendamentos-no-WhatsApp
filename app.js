@@ -291,6 +291,9 @@ function updateBottomCartHeight(){
   const el = $("bottomBar");
   const h = (el && !el.classList.contains("hidden")) ? el.offsetHeight : 0;
   document.documentElement.style.setProperty('--bottom-cart-h', `${h}px`);
+  // debug: mostrar no console o armazenar em atributo para inspeção
+  console.debug('[debug] --bottom-cart-h set to', `${h}px`);
+  if(el) el.setAttribute('data-measured-h', `${h}`);
 } 
 
 function buildWhatsMessage(){
