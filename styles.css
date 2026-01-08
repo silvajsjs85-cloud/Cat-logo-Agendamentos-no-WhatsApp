@@ -6,15 +6,21 @@
   --line:#1d2a3d;
   --accent:#ff5aa5;
   --accent2:#ffd1e6;
+
+  /* preenchido via JS com a altura real da barra */
   --bottom-cart-h: 0px;
-} 
+}
 
 *{box-sizing:border-box}
+
 body{
   margin:0;
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
   background:linear-gradient(180deg,#0b0f14,#0b1220);
   color:var(--text);
+
+  /* garante espaço mesmo se JS demorar */
+  padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
 }
 
 .container{max-width:1100px; margin:0 auto; padding:0 16px;}
@@ -25,27 +31,15 @@ body{
   backdrop-filter: blur(10px);
   border-bottom:1px solid var(--line);
 }
-.topbar-row{
-  display:flex; align-items:center; justify-content:space-between;
-  padding:14px 0;
-}
+.topbar-row{display:flex; align-items:center; justify-content:space-between; padding:14px 0;}
 
 .brand{display:flex; gap:12px; align-items:center;}
 .avatar{
-  width:40px;
-  height:40px;
-  border-radius:50%;
+  width:40px; height:40px; border-radius:50%;
   object-fit:cover;
   border:1px solid var(--line);
   background:#0a0f17;
   display:block;
-}
-.logo{
-  width:40px; height:40px; border-radius:12px;
-  display:grid; place-items:center;
-  background:rgba(255,255,255,.04);
-  border:1px solid var(--line);
-  font-weight:800;
 }
 .title{font-weight:800}
 .subtitle{color:var(--muted); font-size:13px}
@@ -60,39 +54,13 @@ body{
   text-align:center;
 }
 .profile-photo{
-  width:110px;
-  height:110px;
-  border-radius:50%;
+  width:110px; height:110px; border-radius:50%;
   object-fit:cover;
   border:2px solid rgba(255,255,255,.12);
   background:#0a0f17;
 }
-.profile-name{
-  margin:12px 0 4px;
-  font-weight:950;
-  font-size:20px;
-}
+.profile-name{ margin:12px 0 4px; font-weight:950; font-size:20px; }
 .profile-desc{ margin:0; color:var(--muted); }
-
-.cart-btn{
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.04);
-  color:var(--text);
-  padding:10px 12px;
-  border-radius:12px;
-  cursor:pointer;
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
-.cart-btn:hover{border-color:#2a3b55;}
-.pill{
-  background:rgba(255,255,255,.08);
-  border:1px solid var(--line);
-  padding:2px 8px;
-  border-radius:999px;
-  font-weight:800;
-}
 
 .hero{padding:26px 0 18px}
 .hero h1{margin:0 0 6px; font-size:28px}
@@ -117,6 +85,9 @@ body{
   grid-template-columns:repeat(1, minmax(0, 1fr));
   gap:14px;
   padding:10px 0 30px;
+
+  /* evita a lista ficar escondida atrás da barra */
+  padding-bottom: calc(var(--bottom-cart-h) + 48px + env(safe-area-inset-bottom));
 }
 @media (min-width:640px){ .grid{grid-template-columns:repeat(2,1fr);} }
 @media (min-width:940px){ .grid{grid-template-columns:repeat(3,1fr);} }
@@ -144,8 +115,8 @@ body{
   object-fit:cover;
   display:block;
 }
-/* posicionar a tag sobre a imagem */
 .thumb .tag{ position:absolute; top:12px; left:12px; z-index:2; }
+
 .tag{
   font-size:12px;
   padding:4px 10px;
@@ -170,8 +141,10 @@ body{
   border-radius:12px;
   cursor:pointer;
   flex:1;
+  min-width:0;
 }
 .btn:hover{border-color:#2a3b55;}
+
 .cta{
   display:inline-flex; align-items:center; justify-content:center;
   text-decoration:none;
@@ -182,9 +155,11 @@ body{
   font-weight:900;
   border:0;
   cursor:pointer;
+  min-width:0;
 }
 .cta.full{width:100%}
 
+/* Footer */
 .footer{
   border-top:1px solid var(--line);
   padding:18px 0;
@@ -192,73 +167,82 @@ body{
 }
 .footer-row{display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;}
 
-/* Barra fixa do carrinho (bottom bar) */
-.bottom-bar{
-  position:fixed;
-  left:0; right:0; bottom:0;
-  width:100%;
-  z-index:60;
-  background:rgba(11,15,20,.92);
-  border-top:1px solid var(--line);
-  padding:12px 8px;
-  display:flex; justify-content:center; align-items:center;
-} 
-.bottom-row{
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
-  max-width:1100px; width:100%;
-}
-.bar-info{display:flex; align-items:center; gap:12px; color:var(--text);}
-.bar-actions{ display:flex; gap:10px; flex-wrap:wrap; }
-.bar-actions .btn, .bar-actions .cta{ flex:1; min-width:140px; } 
-
-/* A página ganha espaço real para não ficar atrás da barra */
+/* MAIN: ganha espaço real para a barra */
 main{
   padding-bottom: calc(var(--bottom-cart-h) + 16px + env(safe-area-inset-bottom));
 }
-/* Compatibilidade extra: garantir que o body também ganhe espaço (ajuda em alguns navegadores) */
-body{ padding-bottom: calc(var(--bottom-cart-h) + 16px + env(safe-area-inset-bottom)); }
-/* Garantir que a grid (lista de serviços) não fique escondida atrás da bottom bar */
-.grid{ padding-bottom: calc(var(--bottom-cart-h) + 24px); }
 
-
-/* Em telas pequenas ocupa 100% e respeita safe area */
-@media (max-width:640px){
-  .bottom-bar{ padding-bottom: calc(12px + env(safe-area-inset-bottom)); left:0; right:0; border-radius:0; }
-  .bottom-row{ padding:0 16px; }
+/* Bottom bar (corrigida p/ mobile) */
+.bottom-bar{
+  position:fixed;
+  left:0; right:0; bottom:0;
+  z-index:60;
+  background:rgba(11,15,20,.92);
+  border-top:1px solid var(--line);
+  padding:12px 0;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
 }
-
-/* Classe para esconder a barra inferior quando o drawer estiver aberto */
 .bottom-bar.hidden{ display:none; }
 
-/* Drawer: mobile vira tela inteira e respeita safe area */
+.bottom-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.bar-info{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.bar-kv{display:flex; gap:10px; align-items:center;}
+.pill{
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--line);
+  padding:2px 8px;
+  border-radius:999px;
+  font-weight:800;
+}
+.bar-strong{font-weight:950; font-size:18px;}
+
+.bar-actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-shrink:0;
+}
+
+/* MOBILE: vira coluna e botões 100% (não quebra/corta) */
 @media (max-width:520px){
-  .drawer-panel{
+  .thumb{height:130px;}
+
+  .bottom-row{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .bar-info{
+    justify-content:space-between;
     width:100%;
-    left:0;
-    right:0;
-    border-left:0;
-    border-radius:0;
+  }
+
+  .bar-actions{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  .bar-actions .btn,
+  .bar-actions .cta{
+    width:100%;
   }
 }
 
-/* Inputs de data/horário no mobile */
-input[type="date"], input[type="time"]{
-  width:100%;
-  min-height:44px;
-}
-
-@media (max-width:520px){
-  .thumb{ height:130px; }
-}
-
-.field{margin-bottom:12px;}
-.label{display:block; font-size:13px; color:var(--muted); margin:0 0 6px;}
-
-/* estado de erro para campos de data/hora */
-.input.error{ border-color:#ff6b6b; box-shadow:0 0 0 6px rgba(255,107,107,0.04); }
-#dateError{ color:#ffb4b4; font-size:13px; margin-top:6px; display:none; }
-#dateError.show{ display:block; }
-
+/* Drawer */
 .drawer.hidden{display:none;}
 .drawer{ position:fixed; inset:0; z-index:60; }
 .drawer-backdrop{ position:absolute; inset:0; z-index:0; background:rgba(0,0,0,.55); }
@@ -304,6 +288,20 @@ input[type="date"], input[type="time"]{
   border-top:1px solid var(--line);
   display:flex; flex-direction:column; gap:10px;
 }
+
+.field{margin-bottom:12px;}
+.label{display:block; font-size:13px; color:var(--muted); margin:0 0 6px;}
+input[type="date"], input[type="time"]{ width:100%; min-height:44px; }
+
+.error-text{
+  display:none;
+  color:#ffb4b4;
+  font-size:13px;
+  margin:6px 0 8px;
+}
+.input.error{ border-color:#ff6b6b; box-shadow:0 0 0 6px rgba(255,107,107,0.04); }
+.error-text.show{ display:block; }
+
 .cart-list{display:flex; flex-direction:column; gap:10px; margin-top:10px;}
 .cart-item{
   border:1px solid var(--line);
@@ -329,12 +327,7 @@ input[type="date"], input[type="time"]{
   cursor:pointer;
   font-size:16px;
 }
-.qty{
-  min-width:30px;
-  text-align:center;
-  font-weight:900;
-}
-.total-row{
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
-}
-.total{font-size:20px; font-weight:950;}
+.qty{ min-width:30px; text-align:center; font-weight:900; }
+
+.total-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.total{ font-size:20px; font-weight:950; }
