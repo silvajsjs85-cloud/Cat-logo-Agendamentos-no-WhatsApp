@@ -6,7 +6,8 @@
   --line:#1d2a3d;
   --accent:#ff5aa5;
   --accent2:#ffd1e6;
-}
+  --bottom-cart-h: 0px;
+} 
 
 *{box-sizing:border-box}
 body{
@@ -195,23 +196,25 @@ body{
 .bottom-bar{
   position:fixed;
   left:0; right:0; bottom:0;
+  width:100%;
   z-index:60;
   background:rgba(11,15,20,.92);
   border-top:1px solid var(--line);
   padding:12px 8px;
   display:flex; justify-content:center; align-items:center;
-}
+} 
 .bottom-row{
   display:flex; align-items:center; justify-content:space-between; gap:12px;
   max-width:1100px; width:100%;
 }
 .bar-info{display:flex; align-items:center; gap:12px; color:var(--text);}
-.bar-actions{display:flex; gap:8px;}
+.bar-actions{ display:flex; gap:10px; flex-wrap:wrap; }
+.bar-actions .btn, .bar-actions .cta{ flex:1; min-width:140px; } 
 
-/* Garantir espaço para a barra no fim da página */
-@media (min-width:0px){
-  body{ padding-bottom: calc(72px + env(safe-area-inset-bottom, 0)); }
-}
+/* A página ganha espaço real para não ficar atrás da barra */
+main{
+  padding-bottom: calc(var(--bottom-cart-h) + 16px + env(safe-area-inset-bottom));
+} 
 
 /* Em telas pequenas ocupa 100% e respeita safe area */
 @media (max-width:640px){
@@ -237,6 +240,10 @@ body{
 input[type="date"], input[type="time"]{
   width:100%;
   min-height:44px;
+}
+
+@media (max-width:520px){
+  .thumb{ height:130px; }
 }
 
 .field{margin-bottom:12px;}
