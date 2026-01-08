@@ -193,6 +193,9 @@ function updateCartUI(){
 
   // persistir estado
   persistCart();
+
+  // atualizar variável CSS com altura atual da barra inferior
+  updateBottomCartHeight();
 } 
 
 function addToCart(id){
@@ -284,6 +287,12 @@ function closeCart(){
   if(cartCount() > 0) $("bottomBar")?.classList.remove("hidden");
 }
 
+function updateBottomCartHeight(){
+  const el = $("bottomBar");
+  const h = (el && !el.classList.contains("hidden")) ? el.offsetHeight : 0;
+  document.documentElement.style.setProperty('--bottom-cart-h', `${h}px`);
+} 
+
 function buildWhatsMessage(){
   const name = $("clientName").value.trim();
   const notes = $("notes").value.trim();
@@ -334,6 +343,11 @@ async function init(){
   // restaurar carrinho do localStorage (se houver)
   loadCart();
   updateCartUI();
+  // ajustar variável de altura da bottom bar
+  updateBottomCartHeight();
+
+  // atualizar ao redimensionar (importante em mobile/orientation change)
+  window.addEventListener('resize', updateBottomCartHeight);
 
   // restaurar date/time da sessão (se houver)
   const dateEl = $("datePick");
