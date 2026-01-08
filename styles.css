@@ -214,7 +214,12 @@ body{
 /* A página ganha espaço real para não ficar atrás da barra */
 main{
   padding-bottom: calc(var(--bottom-cart-h) + 16px + env(safe-area-inset-bottom));
-} 
+}
+/* Compatibilidade extra: garantir que o body também ganhe espaço (ajuda em alguns navegadores) */
+body{ padding-bottom: calc(var(--bottom-cart-h) + 16px + env(safe-area-inset-bottom)); }
+/* Garantir que a grid (lista de serviços) não fique escondida atrás da bottom bar */
+.grid{ padding-bottom: calc(var(--bottom-cart-h) + 24px); }
+
 
 /* Em telas pequenas ocupa 100% e respeita safe area */
 @media (max-width:640px){
