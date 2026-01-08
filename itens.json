@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "nome": "Extensão de Cílios - Volume Brasileiro",
+    "categoria": "Cílios",
+    "preco": 180.0,
+    "duracaoMin": 90,
+    "tag": "Mais pedido",
+    "imagem": "assets/cilios-volume.jpg"
+  },
+  {
+    "id": 2,
+    "nome": "Manutenção de Cílios",
+    "categoria": "Cílios",
+    "preco": 120.0,
+    "duracaoMin": 45,
+    "tag": "Manutenção",
+    "imagem": "assets/manutencao-cilios.jpg"
+  },
+  {
+    "id": 3,
+    "nome": "Design de Sobrancelhas",
+    "categoria": "Sobrancelhas",
+    "preco": 40.0,
+    "duracaoMin": 30,
+    "tag": "Rápido",
+    "imagem": "assets/design-sobrancelhas.jpg"
+  },
+  {
+    "id": 4,
+    "nome": "Design + Henna",
+    "categoria": "Sobrancelhas",
+    "preco": 60.0,
+    "duracaoMin": 45,
+    "tag": "Top",
+    "imagem": "assets/design-henna.jpg"
+  },
+  {
+    "id": 5,
+    "nome": "Limpeza de Pele",
+    "categoria": "Estética",
+    "preco": 120.0,
+    "duracaoMin": 60,
+    "tag": "Skincare",
+    "imagem": "assets/limpeza-pele.jpg"
+  }
+]
