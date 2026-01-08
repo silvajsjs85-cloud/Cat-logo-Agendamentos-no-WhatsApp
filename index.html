@@ -2,10 +2,11 @@
 <html lang="pt-br">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Catálogo | Studio</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <header class="topbar">
     <div class="container topbar-row">
@@ -52,7 +53,7 @@
 
   <!-- Drawer do carrinho -->
   <aside id="cartDrawer" class="drawer hidden" aria-hidden="true">
-    <div class="drawer-panel">
+    <div class="drawer-panel" role="dialog" aria-label="Carrinho">
       <div class="drawer-header">
         <div>
           <div class="drawer-title">Seu carrinho</div>
@@ -76,12 +77,13 @@
           <label class="label" for="datePick">Data</label>
           <input id="datePick" class="input" type="date" />
         </div>
+
         <div class="field">
           <label class="label" for="timePick">Horário</label>
           <input id="timePick" class="input" type="time" />
         </div>
 
-        <div id="dateError" class="muted" style="color:#ffb4b4; display:none; margin-bottom:8px;">Selecione data e horário</div>
+        <div id="dateError" class="error-text">Selecione data e horário</div>
 
         <div class="cart-list" id="cartList"></div>
       </div>
@@ -91,31 +93,38 @@
           <div>
             <div class="muted">Total</div>
             <div id="cartTotal" class="total">R$ 0,00</div>
+
             <div class="muted" style="margin-top:6px;">Duração estimada</div>
             <div id="cartDuration" class="muted">0 min</div>
           </div>
+
           <button id="clearCart" class="btn" type="button">Limpar</button>
         </div>
 
-        <button id="sendWhats" class="cta full" type="button">
-          Enviar no WhatsApp
-        </button>
+        <button id="sendWhats" class="cta full" type="button">Enviar no WhatsApp</button>
       </div>
     </div>
 
-    <div class="drawer-backdrop" id="backdrop"></div>
+    <div class="drawer-backdrop" id="backdrop" aria-hidden="true"></div>
   </aside>
 
-  <!-- Bottom fixed cart bar -->
-  <div id="bottomBar" class="bottom-bar" role="region" aria-label="Barra do carrinho">
+  <!-- Bottom bar -->
+  <div id="bottomBar" class="bottom-bar hidden" role="region" aria-label="Barra do carrinho">
     <div class="container bottom-row">
       <div class="bar-info">
-        <div class="muted">Itens</div>
-        <div style="display:flex; align-items:center; gap:12px; margin-left:8px;">
-          <span id="barCount" class="pill">0</span>
-          <div class="muted" style="margin-left:6px;">Total</div>
-          <div id="barTotal" class="total" style="margin-left:6px;">R$ 0,00</div>
-          <div id="barDuration" class="muted" style="margin-left:6px;">0 min</div>
+        <div class="bar-kv">
+          <div class="muted">Itens</div>
+          <div id="barCount" class="pill">0</div>
+        </div>
+
+        <div class="bar-kv">
+          <div class="muted">Total</div>
+          <div id="barTotal" class="bar-strong">R$ 0,00</div>
+        </div>
+
+        <div class="bar-kv">
+          <div class="muted">Duração</div>
+          <div id="barDuration" class="muted">0 min</div>
         </div>
       </div>
 
