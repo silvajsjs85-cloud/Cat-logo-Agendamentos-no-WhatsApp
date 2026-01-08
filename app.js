@@ -135,6 +135,11 @@ function updateCartUI(){
     $("sendWhats").style.opacity = "0.6";
     const barWhatsEl = $("barWhats");
     if(barWhatsEl){ barWhatsEl.disabled = true; barWhatsEl.style.opacity = "0.6"; }
+
+    // esconder barra inferior quando não há itens
+    const bottomBarEl = $("bottomBar");
+    if(bottomBarEl) bottomBarEl.classList.add("hidden");
+
     persistCart();
     return;
   }
@@ -174,6 +179,17 @@ function updateCartUI(){
   list.querySelectorAll("[data-dec]").forEach(btn => {
     btn.addEventListener("click", () => removeFromCart(parseInt(btn.dataset.dec, 10)));
   });
+
+  // controlar visibilidade da bottom bar
+  const bottomBarEl = $("bottomBar");
+  if(bottomBarEl){
+    if(cartCount() === 0) bottomBarEl.classList.add("hidden");
+    else {
+      // se o drawer estiver aberto, manter escondida; caso contrário, mostrar
+      if($("cartDrawer") && $("cartDrawer").classList.contains("hidden")) bottomBarEl.classList.remove("hidden");
+      else bottomBarEl.classList.add("hidden");
+    }
+  }
 
   // persistir estado
   persistCart();
@@ -242,6 +258,9 @@ function openCart(){
   $("cartDrawer").classList.remove("hidden");
   $("cartDrawer").setAttribute("aria-hidden", "false");
 
+  // Esconde barra inferior do carrinho enquanto o drawer estiver aberto
+  $("bottomBar")?.classList.add("hidden");
+
   const dateEl = $('datePick');
   if(dateEl){
     // impedir datas passadas
@@ -256,10 +275,13 @@ function openCart(){
     if(date && !date.value) { date.focus(); }
     else if(time && !time.value) { time.focus(); }
   }
-} 
+}  
 function closeCart(){
   $("cartDrawer").classList.add("hidden");
   $("cartDrawer").setAttribute("aria-hidden", "true");
+
+  // Volta a barra inferior somente se tiver itens
+  if(cartCount() > 0) $("bottomBar")?.classList.remove("hidden");
 }
 
 function buildWhatsMessage(){
@@ -378,3 +400,4 @@ async function init(){
 }
 
 init();
+
