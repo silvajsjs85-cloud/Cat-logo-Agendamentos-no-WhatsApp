@@ -219,6 +219,26 @@ body{
   .bottom-row{ padding:0 16px; }
 }
 
+/* Classe para esconder a barra inferior quando o drawer estiver aberto */
+.bottom-bar.hidden{ display:none; }
+
+/* Drawer: mobile vira tela inteira e respeita safe area */
+@media (max-width:520px){
+  .drawer-panel{
+    width:100%;
+    left:0;
+    right:0;
+    border-left:0;
+    border-radius:0;
+  }
+}
+
+/* Inputs de data/horário no mobile */
+input[type="date"], input[type="time"]{
+  width:100%;
+  min-height:44px;
+}
+
 .field{margin-bottom:12px;}
 .label{display:block; font-size:13px; color:var(--muted); margin:0 0 6px;}
 
@@ -228,24 +248,19 @@ body{
 #dateError.show{ display:block; }
 
 .drawer.hidden{display:none;}
-.drawer{
-  position:fixed; inset:0; z-index:50;
-  display:grid;
-  grid-template-columns: 1fr;
-}
-.drawer-backdrop{
-  position:absolute; inset:0;
-  background:rgba(0,0,0,.55);
-  z-index:50; /* garantir que backdrop fique abaixo do painel */
-}
+.drawer{ position:fixed; inset:0; z-index:60; }
+.drawer-backdrop{ position:absolute; inset:0; z-index:0; background:rgba(0,0,0,.55); }
 .drawer-panel{
-  position:absolute; right:0; top:0; bottom:0;
+  position:absolute;
+  right:0; top:0; bottom:0;
   width:min(420px, 100%);
   background:rgba(17,24,38,.96);
   border-left:1px solid var(--line);
-  display:flex; flex-direction:column;
-  z-index:55; /* painel acima do backdrop para receber cliques */
-} 
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  max-height:100dvh;
+}
 .drawer-header{
   padding:14px;
   border-bottom:1px solid var(--line);
@@ -261,9 +276,19 @@ body{
   cursor:pointer;
   font-size:18px;
 }
-.drawer-body{padding:14px; overflow:auto; flex:1;}
-.drawer-footer{
+.drawer-body{
+  overflow:auto;
+  -webkit-overflow-scrolling: touch;
+  flex:1;
   padding:14px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+.drawer-footer{
+  position:sticky;
+  bottom:0;
+  background:rgba(17,24,38,.96);
+  padding:14px;
+  padding-bottom: calc(14px + env(safe-area-inset-bottom));
   border-top:1px solid var(--line);
   display:flex; flex-direction:column; gap:10px;
 }
@@ -301,3 +326,4 @@ body{
   display:flex; align-items:center; justify-content:space-between; gap:12px;
 }
 .total{font-size:20px; font-weight:950;}
+
