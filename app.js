@@ -1,102 +1,34 @@
-// WhatsApp da Fabiana: 69 99240-5075
-// wa.me exige DDI + DDD + número sem espaços/traços
+// WhatsApp: wa.me exige DDI + DDD + número sem espaços/traços
 const WHATS_NUMBER = "5569992405075";
 
-const fmtBRL = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 const $ = (id) => document.getElementById(id);
+const fmtBRL = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+function formatDurationItem(mins){
+  if (mins == null) return "";
+  if (mins < 60) return `${mins}min`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${h}h${String(m).padStart(2, "0")}`;
+}
+
+function formatDurationTotal(mins){
+  if (!mins) return "0 min";
+  if (mins < 60) return `${mins} min`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return `${h}h${String(m).padStart(2, "0")}`;
+}
+
+function buildWhatsLink(message){
+  return `https://wa.me/${WHATS_NUMBER}?text=${encodeURIComponent(message)}`;
+}
 
 let itens = [];
 let categoriaAtual = "Todas";
 let buscaAtual = "";
 
-// carrinho: { [id]: { item, qty } }
-let cart = {};
-
-// Formata duração para exibir no card (ex: 90 -> "1h30", 45 -> "45min")
-function formatDurationForItem(mins){
-  if(!mins && mins !== 0) return '';
-  if(mins < 60) return `${mins}min`;
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return `${h}h${String(m).padStart(2,'0')}`;
-}
-// Formata duração total (regras: 0-59 -> "X min", 60+ -> "HhMM")
-function formatDurationForTotal(mins){
-  if(!mins && mins !== 0) return '0 min';
-  if(mins < 60) return `${mins} min`;
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return `${h}h${String(m).padStart(2,'0')}`;
-}
-
-function cartDurationMin(){
-  return Object.values(cart).reduce((acc, x) => acc + (x.qty * (x.item.duracaoMin || 0)), 0);
-}
-
-function persistCart(){
-  try{
-    const map = {};
-    Object.values(cart).forEach(({item, qty}) => { map[item.id] = qty; });
-    localStorage.setItem('cart', JSON.stringify(map));
-  }catch(e){/*ignore*/}
-}
-function loadCart(){
-  try{
-    const str = localStorage.getItem('cart');
-    if(!str) return;
-    const map = JSON.parse(str);
-    Object.keys(map).forEach(k => {
-      const id = parseInt(k, 10);
-      const qty = map[k];
-      const item = itens.find(x => x.id === id);
-      if(item){ cart[id] = { item, qty }; }
-    });
-  }catch(e){/*ignore*/}
-}
-
-function showDateError(show){
-  const dateEl = $('datePick');
-  const timeEl = $('timePick');
-  const err = $('dateError');
-  if(show){
-    if(dateEl) dateEl.classList.add('error');
-    if(timeEl) timeEl.classList.add('error');
-    if(err) { err.classList.add('show'); err.style.display = 'block'; }
-  }else{
-    if(dateEl) dateEl.classList.remove('error');
-    if(timeEl) timeEl.classList.remove('error');
-    if(err) { err.classList.remove('show'); err.style.display = 'none'; }
-  }
-} 
-
-function buildWhatsLink(message){
-  const text = encodeURIComponent(message);
-  return `https://wa.me/${WHATS_NUMBER}?text=${text}`;
-}
-
-function uniqueCategories(items){
-  const set = new Set(items.map(p => p.categoria));
-  return ["Todas", ...Array.from(set).sort((a,b)=>a.localeCompare(b))];
-}
-
-function renderCategories(items){
-  const select = $("category");
-  select.innerHTML = "";
-  uniqueCategories(items).forEach(cat => {
-    const opt = document.createElement("option");
-    opt.value = cat;
-    opt.textContent = cat;
-    select.appendChild(opt);
-  });
-}
-
-function filterItems(items){
-  return items.filter(p => {
-    const matchCat = (categoriaAtual === "Todas") || (p.categoria === categoriaAtual);
-    const matchSearch = !buscaAtual || p.nome.toLowerCase().includes(buscaAtual);
-    return matchCat && matchSearch;
-  });
-}
+let cart = {}; // { [id]: { item, qty } }
 
 function cartCount(){
   return Object.values(cart).reduce((acc, x) => acc + x.qty, 0);
@@ -106,57 +38,231 @@ function cartTotal(){
   return Object.values(cart).reduce((acc, x) => acc + (x.qty * x.item.preco), 0);
 }
 
+function cartDurationMin(){
+  return Object.values(cart).reduce((acc, x) => acc + (x.qty * (x.item.duracaoMin || 0)), 0);
+}
+
+function persistCart(){
+  try{
+    const map = {};
+    Object.values(cart).forEach(({ item, qty }) => (map[item.id] = qty));
+    localStorage.setItem("cart", JSON.stringify(map));
+  }catch(_e){}
+}
+
+function loadCart(){
+  try{
+    const raw = localStorage.getItem("cart");
+    if (!raw) return;
+    const map = JSON.parse(raw);
+    for (const k of Object.keys(map)){
+      const id = Number(k);
+      const qty = Number(map[k]);
+      const item = itens.find((x) => x.id === id);
+      if (item && qty > 0) cart[id] = { item, qty };
+    }
+  }catch(_e){}
+}
+
+function uniqueCategories(items){
+  const set = new Set(items.map((p) => p.categoria));
+  return ["Todas", ...Array.from(set).sort((a,b)=>a.localeCompare(b))];
+}
+
+function renderCategories(items){
+  const select = $("category");
+  select.innerHTML = "";
+  uniqueCategories(items).forEach((cat) => {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat;
+    select.appendChild(opt);
+  });
+}
+
+function filterItems(items){
+  return items.filter((p) => {
+    const matchCat = (categoriaAtual === "Todas") || (p.categoria === categoriaAtual);
+    const matchSearch = !buscaAtual || p.nome.toLowerCase().includes(buscaAtual);
+    return matchCat && matchSearch;
+  });
+}
+
+function addToCart(id){
+  const item = itens.find((x) => x.id === id);
+  if (!item) return;
+
+  if (!cart[id]) cart[id] = { item, qty: 0 };
+  cart[id].qty += 1;
+
+  updateCartUI();
+}
+
+function removeFromCart(id){
+  if (!cart[id]) return;
+  cart[id].qty -= 1;
+  if (cart[id].qty <= 0) delete cart[id];
+  updateCartUI();
+}
+
+function clearCart(){
+  cart = {};
+  updateCartUI();
+}
+
+function showDateError(show){
+  const dateEl = $("datePick");
+  const timeEl = $("timePick");
+  const err = $("dateError");
+
+  if (show){
+    dateEl?.classList.add("error");
+    timeEl?.classList.add("error");
+    err?.classList.add("show");
+  } else {
+    dateEl?.classList.remove("error");
+    timeEl?.classList.remove("error");
+    err?.classList.remove("show");
+  }
+}
+
+function buildWhatsMessage(){
+  const name = $("clientName").value.trim();
+  const notes = $("notes").value.trim();
+  const date = $("datePick").value;
+  const time = $("timePick").value;
+
+  const lines = [];
+  lines.push("Olá! Vim pelo site e gostaria de agendar:");
+  lines.push("");
+
+  Object.values(cart).forEach(({ item, qty }) => {
+    lines.push(`• ${qty}x ${item.nome} — ${fmtBRL(item.preco)} (${formatDurationItem(item.duracaoMin)})`);
+  });
+
+  lines.push("");
+  lines.push(`Total: ${fmtBRL(cartTotal())}`);
+  lines.push(`Duração estimada: ${formatDurationTotal(cartDurationMin())}`);
+
+  if (date && time){
+    const [y,m,d] = date.split("-");
+    lines.push("");
+    lines.push(`Data: ${d}/${m}/${y}`);
+    lines.push(`Horário: ${time}`);
+  }
+
+  if (name){
+    lines.push("");
+    lines.push(`Nome: ${name}`);
+  }
+  if (notes){
+    lines.push("");
+    lines.push(`Obs: ${notes}`);
+  }
+
+  return lines.join("\n");
+}
+
+function openCart(){
+  $("cartDrawer").classList.remove("hidden");
+  $("cartDrawer").setAttribute("aria-hidden", "false");
+  $("bottomBar")?.classList.add("hidden"); // evita duplicar barra + drawer
+
+  const dateEl = $("datePick");
+  if (dateEl){
+    dateEl.min = new Date().toISOString().split("T")[0];
+  }
+}
+
+function closeCart(){
+  $("cartDrawer").classList.add("hidden");
+  $("cartDrawer").setAttribute("aria-hidden", "true");
+  if (cartCount() > 0) $("bottomBar")?.classList.remove("hidden");
+  updateBottomBarHeight();
+}
+
+function updateBottomBarHeight(){
+  const bar = $("bottomBar");
+  const h = (bar && !bar.classList.contains("hidden")) ? bar.offsetHeight : 0;
+  document.documentElement.style.setProperty("--bottom-cart-h", `${h}px`);
+}
+
+function renderGrid(items){
+  const grid = $("grid");
+  grid.innerHTML = "";
+
+  if (items.length === 0){
+    grid.innerHTML = `<div class="muted">Nenhum item encontrado.</div>`;
+    return;
+  }
+
+  items.forEach((p) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="thumb">
+        <img src="${p.imagem}" alt="${p.nome}" class="thumb-img" loading="lazy" />
+        ${p.tag ? `<span class="tag">${p.tag}</span>` : ``}
+      </div>
+      <div class="content">
+        <div class="name">${p.nome}</div>
+        <div class="muted">${p.categoria}</div>
+        <div class="price">${fmtBRL(p.preco)} • ${formatDurationItem(p.duracaoMin)}</div>
+
+        <div class="actions">
+          <button class="btn" type="button" data-add="${p.id}">Adicionar</button>
+          <button class="cta" type="button" data-add="${p.id}">+ Carrinho</button>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll("[data-add]").forEach((btn) => {
+    btn.addEventListener("click", () => addToCart(Number(btn.dataset.add)));
+  });
+}
+
 function updateCartUI(){
-  const cartCountEl = $("cartCount");
-  if(cartCountEl) cartCountEl.textContent = cartCount();
-  const barCountEl = $("barCount");
-  if(barCountEl) barCountEl.textContent = cartCount();
-  $("cartSubtitle").textContent = `${cartCount()} item(s)`;
-  const cartTotalEl = $("cartTotal");
-  if(cartTotalEl) cartTotalEl.textContent = fmtBRL(cartTotal());
-  const barTotalEl = $("barTotal");
-  if(barTotalEl) barTotalEl.textContent = fmtBRL(cartTotal());
+  const count = cartCount();
 
-  // Atualizar duração total
-  const totalMin = cartDurationMin();
-  const cartDurEl = $("cartDuration");
-  if(cartDurEl) cartDurEl.textContent = formatDurationForTotal(totalMin);
-  const barDurEl = $("barDuration");
-  if(barDurEl) barDurEl.textContent = formatDurationForTotal(totalMin);
+  // drawer
+  $("cartSubtitle").textContent = `${count} item(s)`;
+  $("cartTotal").textContent = fmtBRL(cartTotal());
+  $("cartDuration").textContent = formatDurationTotal(cartDurationMin());
 
+  // bottom bar
+  $("barCount").textContent = String(count);
+  $("barTotal").textContent = fmtBRL(cartTotal());
+  $("barDuration").textContent = formatDurationTotal(cartDurationMin());
+
+  // lista do carrinho
   const list = $("cartList");
   list.innerHTML = "";
 
   const entries = Object.values(cart);
-
-  if(entries.length === 0){
+  if (entries.length === 0){
     list.innerHTML = `<div class="muted">Seu carrinho está vazio.</div>`;
     $("sendWhats").disabled = true;
-    $("sendWhats").style.opacity = "0.6";
-    const barWhatsEl = $("barWhats");
-    if(barWhatsEl){ barWhatsEl.disabled = true; barWhatsEl.style.opacity = "0.6"; }
+    $("barWhats").disabled = true;
 
-    // esconder barra inferior quando não há itens
-    const bottomBarEl = $("bottomBar");
-    if(bottomBarEl) bottomBarEl.classList.add("hidden");
-
+    $("bottomBar")?.classList.add("hidden");
     persistCart();
+    updateBottomBarHeight();
     return;
   }
 
   $("sendWhats").disabled = false;
-  $("sendWhats").style.opacity = "1";
-  const barWhatsEl = $("barWhats");
-  if(barWhatsEl){ barWhatsEl.disabled = false; barWhatsEl.style.opacity = "1"; }
+  $("barWhats").disabled = false;
 
-  entries.forEach(({item, qty}) => {
+  entries.forEach(({ item, qty }) => {
     const div = document.createElement("div");
     div.className = "cart-item";
     div.innerHTML = `
       <div class="cart-item-top">
         <div>
           <div class="cart-item-name">${item.nome}</div>
-          <div class="cart-item-meta">${item.categoria} • ${fmtBRL(item.preco)} • ${formatDurationForItem(item.duracaoMin)}</div>
+          <div class="cart-item-meta">${item.categoria} • ${fmtBRL(item.preco)} • ${formatDurationItem(item.duracaoMin)}</div>
         </div>
         <div class="cart-item-name">${fmtBRL(item.preco * qty)}</div>
       </div>
@@ -173,169 +279,24 @@ function updateCartUI(){
     list.appendChild(div);
   });
 
-  list.querySelectorAll("[data-inc]").forEach(btn => {
-    btn.addEventListener("click", () => addToCart(parseInt(btn.dataset.inc, 10)));
+  list.querySelectorAll("[data-inc]").forEach((btn) => {
+    btn.addEventListener("click", () => addToCart(Number(btn.dataset.inc)));
   });
-  list.querySelectorAll("[data-dec]").forEach(btn => {
-    btn.addEventListener("click", () => removeFromCart(parseInt(btn.dataset.dec, 10)));
+  list.querySelectorAll("[data-dec]").forEach((btn) => {
+    btn.addEventListener("click", () => removeFromCart(Number(btn.dataset.dec)));
   });
 
-  // controlar visibilidade da bottom bar
-  const bottomBarEl = $("bottomBar");
-  if(bottomBarEl){
-    if(cartCount() === 0) bottomBarEl.classList.add("hidden");
-    else {
-      // se o drawer estiver aberto, manter escondida; caso contrário, mostrar
-      if($("cartDrawer") && $("cartDrawer").classList.contains("hidden")) bottomBarEl.classList.remove("hidden");
-      else bottomBarEl.classList.add("hidden");
-    }
+  // mostra a barra somente quando drawer estiver fechado
+  if ($("cartDrawer").classList.contains("hidden")) {
+    $("bottomBar")?.classList.remove("hidden");
   }
 
-  // persistir estado
   persistCart();
-
-  // atualizar variável CSS com altura atual da barra inferior
-  updateBottomCartHeight();
-} 
-
-function addToCart(id){
-  const item = itens.find(x => x.id === id);
-  if(!item) return;
-
-  if(!cart[id]) cart[id] = { item, qty: 0 };
-  cart[id].qty += 1;
-
-  updateCartUI();
-}
-
-function removeFromCart(id){
-  if(!cart[id]) return;
-  cart[id].qty -= 1;
-  if(cart[id].qty <= 0) delete cart[id];
-
-  updateCartUI();
-}
-
-function clearCart(){
-  cart = {};
-  updateCartUI();
-}
-
-function renderGrid(items){
-  const grid = $("grid");
-  grid.innerHTML = "";
-
-  if(items.length === 0){
-    grid.innerHTML = `<div class="muted">Nenhum item encontrado.</div>`;
-    return;
-  }
-
-  items.forEach(p => {
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `
-      <div class="thumb">
-        <img src="${p.imagem}" alt="${p.nome}" class="thumb-img" loading="lazy" />
-        ${p.tag ? `<span class="tag">${p.tag}</span>` : ``}
-      </div>
-      <div class="content">
-        <div class="name">${p.nome}</div>
-        <div class="muted">${p.categoria}</div>
-        <div class="price">${fmtBRL(p.preco)} • ${formatDurationForItem(p.duracaoMin)}</div> 
-
-        <div class="actions">
-          <button class="btn" type="button" data-add="${p.id}">Adicionar</button>
-          <button class="cta" type="button" data-add="${p.id}">+ Carrinho</button>
-        </div>
-      </div>
-    `;
-    grid.appendChild(card);
-  });
-
-  grid.querySelectorAll("[data-add]").forEach(btn => {
-    btn.addEventListener("click", () => addToCart(parseInt(btn.dataset.add, 10)));
-  });
-}
-
-function openCart(){
-  $("cartDrawer").classList.remove("hidden");
-  $("cartDrawer").setAttribute("aria-hidden", "false");
-
-  // Esconde barra inferior do carrinho enquanto o drawer estiver aberto
-  $("bottomBar")?.classList.add("hidden");
-
-  const dateEl = $('datePick');
-  if(dateEl){
-    // impedir datas passadas
-    const today = new Date().toISOString().split('T')[0];
-    dateEl.min = today;
-  }
-
-  // se houver itens, focar no campo de data
-  if(cartCount() > 0){
-    const date = $('datePick');
-    const time = $('timePick');
-    if(date && !date.value) { date.focus(); }
-    else if(time && !time.value) { time.focus(); }
-  }
-}  
-function closeCart(){
-  $("cartDrawer").classList.add("hidden");
-  $("cartDrawer").setAttribute("aria-hidden", "true");
-
-  // Volta a barra inferior somente se tiver itens
-  if(cartCount() > 0) $("bottomBar")?.classList.remove("hidden");
-}
-
-function updateBottomCartHeight(){
-  const el = $("bottomBar");
-  const h = (el && !el.classList.contains("hidden")) ? el.offsetHeight : 0;
-  document.documentElement.style.setProperty('--bottom-cart-h', `${h}px`);
-  // debug: mostrar no console o armazenar em atributo para inspeção
-  console.debug('[debug] --bottom-cart-h set to', `${h}px`);
-  if(el) el.setAttribute('data-measured-h', `${h}`);
-} 
-
-function buildWhatsMessage(){
-  const name = $("clientName").value.trim();
-  const notes = $("notes").value.trim();
-  const date = $("datePick").value;
-  const time = $("timePick").value;
-
-  const lines = [];
-  lines.push("Olá! Vim pelo site e gostaria de agendar:");
-  lines.push("");
-
-  Object.values(cart).forEach(({item, qty}) => {
-    const dur = formatDurationForItem(item.duracaoMin);
-    lines.push(`• ${qty}x ${item.nome} — ${fmtBRL(item.preco)} (${dur})`);
-  });
-
-  lines.push("");
-  lines.push(`Total: ${fmtBRL(cartTotal())}`);
-  lines.push(`Duração estimada: ${formatDurationForTotal(cartDurationMin())}`);
-
-  if(date && time){
-    const [y,m,d] = date.split('-');
-    lines.push("");
-    lines.push(`Data: ${d}/${m}/${y}`);
-    lines.push(`Horário: ${time}`);
-  }
-
-  if(name){
-    lines.push("");
-    lines.push(`Nome: ${name}`);
-  }
-  if(notes){
-    lines.push("");
-    lines.push(`Obs: ${notes}`);
-  }
-
-  return lines.join("\n");
+  updateBottomBarHeight();
 }
 
 async function init(){
-  $("year").textContent = new Date().getFullYear();
+  $("year").textContent = String(new Date().getFullYear());
 
   const res = await fetch("itens.json");
   itens = await res.json();
@@ -343,30 +304,10 @@ async function init(){
   renderCategories(itens);
   renderGrid(itens);
 
-  // restaurar carrinho do localStorage (se houver)
   loadCart();
   updateCartUI();
-  // ajustar variável de altura da bottom bar
-  updateBottomCartHeight();
 
-  // atualizar ao redimensionar (importante em mobile/orientation change)
-  window.addEventListener('resize', updateBottomCartHeight);
-
-  // restaurar date/time da sessão (se houver)
-  const dateEl = $("datePick");
-  const timeEl = $("timePick");
-  if(dateEl){
-    const savedDate = sessionStorage.getItem('cart_datePick');
-    if(savedDate) dateEl.value = savedDate;
-    dateEl.min = new Date().toISOString().split('T')[0];
-    dateEl.addEventListener('change', (e) => { sessionStorage.setItem('cart_datePick', e.target.value); showDateError(false); });
-  }
-  if(timeEl){
-    const savedTime = sessionStorage.getItem('cart_timePick');
-    if(savedTime) timeEl.value = savedTime;
-    timeEl.addEventListener('change', (e) => { sessionStorage.setItem('cart_timePick', e.target.value); showDateError(false); });
-  }
-
+  // controls
   $("search").addEventListener("input", (e) => {
     buscaAtual = e.target.value.trim().toLowerCase();
     renderGrid(filterItems(itens));
@@ -377,42 +318,44 @@ async function init(){
     renderGrid(filterItems(itens));
   });
 
-  const openBtn = $("openCart") || $("barViewCart");
-  if(openBtn) openBtn.addEventListener("click", openCart);
+  // drawer
+  $("barViewCart").addEventListener("click", openCart);
   $("closeCart").addEventListener("click", closeCart);
   $("backdrop").addEventListener("click", closeCart);
-
-  // Prevenir que cliques dentro do painel propaguem para o backdrop
-  const drawerPanel = $("cartDrawer") && $("cartDrawer").querySelector('.drawer-panel');
-  if(drawerPanel){
-    // interceptar tanto mousedown quanto click para diferentes comportamentos de navegador
-    drawerPanel.addEventListener('mousedown', (e) => e.stopPropagation());
-    drawerPanel.addEventListener('click', (e) => e.stopPropagation());
-  }
-
   $("clearCart").addEventListener("click", clearCart);
 
+  // valida data/hora e manda no Whats
   function handleSendWhats(){
-    // validações
-    if(cartCount() === 0) return;
+    if (cartCount() === 0) return;
+
     const date = $("datePick").value;
     const time = $("timePick").value;
-    if(!date || !time){
-      // abrir drawer para preencher
+
+    if (!date || !time){
       openCart();
       showDateError(true);
       return;
     }
 
     const msg = buildWhatsMessage();
-    window.open(buildWhatsLink(msg), "_blank", "noopener");
+    window.open(buildWhatsLink(msg), "_blank", "noopener,noreferrer");
   }
+
   $("sendWhats").addEventListener("click", handleSendWhats);
-  const barWhats = $("barWhats");
-  if(barWhats) barWhats.addEventListener("click", handleSendWhats);
+  $("barWhats").addEventListener("click", handleSendWhats);
+
+  $("datePick").addEventListener("change", () => showDateError(false));
+  $("timePick").addEventListener("change", () => showDateError(false));
+
+  // manter altura correta (especialmente quando o botão quebra linha)
+  window.addEventListener("resize", updateBottomBarHeight);
+  if (window.ResizeObserver){
+    const ro = new ResizeObserver(updateBottomBarHeight);
+    ro.observe($("bottomBar"));
+  }
 
   document.addEventListener("keydown", (e) => {
-    if(e.key === "Escape") closeCart();
+    if (e.key === "Escape") closeCart();
   });
 }
 
